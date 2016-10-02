@@ -1,11 +1,17 @@
 <!DOCTYPE html>
 <html lang = "en">
-   <head></head>
-   <body>
-      
-      <h3>
-         <a href = "{{ url_for('show_all') }}">Feature Request - PreAlpha</a>
-      </h3>
+  <head> 
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+    
+    <h3>
+      <a href = "{{ url_for('show_all') }}">Feature Request - PreAlpha</a>
+    </h3>
       
       <hr/>
       {%- for message in get_flashed_messages() %}
@@ -14,31 +20,34 @@
 		
       <h3>Requests (<a href = "{{ url_for('new') }}"> Add New Request </a>)</h3>
       
-      <table>
-         <thead>
-            <tr>
-               <th>Title</th>
-               <th>Description</th>
-               <th>Client</th>
-               <th>Priority</th>
-	       <th>Target Date</th>
-	       <th>Product Area</th>
-            </tr>
-         </thead>
-         
-         <tbody>
-            {% for request in feature_request %}
-               <tr>
-                  <td>{{ request.title }}</td>
-                  <td>{{ request.description }}</td>
-                  <td>{{ request.client }}</td>
-                  <td>{{ request.priority }}</td>
-		  <td>{{ request.targetdate }}</td>
-		  <td>{{ request.productarea }}</td>
-               </tr>
-            {% endfor %}
-         </tbody>
-      </table>
       
-   </body>
+      <div class="container">
+	<table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Description</th>
+              <th>Client</th>
+              <th>Priority</th>
+	      <th>Target Date</th>
+	      <th>Product Area</th>
+            </tr>
+          </thead>
+          
+          <tbody>
+            {% for request in feature_request %}
+            <tr>
+              <td>{{ request.title }}</td>
+              <td>{{ request.description }}</td>
+              <td>{{ request.client }}</td>
+              <td>{{ request.priority }}</td>
+	      <td>{{ request.targetdate }}</td>
+	      <td>{{ request.productarea }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+	</table>
+      </div>
+	
+  </body>
 </html>

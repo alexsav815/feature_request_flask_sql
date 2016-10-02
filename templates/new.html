@@ -1,16 +1,27 @@
 <!DOCTYPE html>
 <html>
-   <body>
-   
-      <h3>Students - Flask SQLAlchemy example</h3>
-      <hr/>
-      
-      {%- for category, message in get_flashed_messages(with_categories = true) %}
-         <div class = "alert alert-danger">
-            {{ message }}
-         </div>
-      {%- endfor %}
-      
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  </head>
+  
+  <body>
+    
+    <h3>Submit New Request</h3>
+    <hr/>
+    
+    {%- for category, message in get_flashed_messages(with_categories = true) %}
+    <div class = "alert alert-danger">
+      {{ message }}
+    </div>
+    {%- endfor %}
+    
+	 
+    
+    <div class="container">
       <form action = "{{ request.path }}" method = "POST">
          <label for = "title">Title</label><br>
          <input type = "text" name = "title" placeholder = "Title" /><br>
@@ -32,6 +43,7 @@
 
          <input type = "submit" value = "Submit" />
       </form>
-      
+    </div>      
+
    </body>
 </html>
