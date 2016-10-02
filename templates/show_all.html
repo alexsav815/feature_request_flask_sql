@@ -14,15 +14,52 @@
    } 
    header { 
      background: rgb(205,105,63) !important;  
-     padding-top: 5px;
-     padding-bottom: 15px;
+     padding-top: 1px;
+     padding-bottom: 10px;
    }
+   .title {
+     text-decoration: none;
+     outline: 0;
+   }
+   .title:link {
+     color: rgb( 220,210,210 );
+   }
+   
+   .title:visited {
+     color: rgb( 0,0,0 );
+   }
+   
+   .title:active {
+     color: rgb( 220,210,210 );
+   }
+   .title:hover {
+     color: rgb( 255,255,255 );
+     text-decoration: none;
+   }
+
+   .table-fixed thead{
+     width: 97%;
+   }
+   .table-fixed tbody{
+     height: 230px;
+     overflow-y: auto;
+     width: 100%;
+   }
+   .table-fixed thead, .table-fixed tbody, .table-fixed tr, .table-fixed td, .table-fixed th {
+     display: block;
+   } 
+
+   .table-fixed tbody td, .table-fixed thead > tr> th {
+     float: left;
+     border-bottom-width: 0;
+   }
+
   </style>
   
 
   <header>
     <h2 class="text-center" >
-      <a href = "{{ url_for('show_all') }}" style="color:rgb(0,0,0)">Feature Request - PreAlpha</a>
+      <a href = "{{ url_for('show_all') }}" class="title">Feature Request - PreAlpha</a>
     </h2>
   </header>
  
@@ -36,8 +73,8 @@
       </div>
       {%- endfor %}
       
-      <div class="container">
-	<table class="table table-striped table-condensed">
+      <div class="container" style="height:350px;overflow:auto" >
+	<table class="table table-striped table-condensed table-responsive" >
           <thead>
             <tr>
               <th>Title</th>
@@ -62,12 +99,20 @@
             {% endfor %}
           </tbody>
 	</table>
-
-	<hr/>
-	
+      </div>
+      
+      <hr/>
+      
+      <div class="container" style="height:100px">
 	<a href = "{{ url_for('new') }}" class="btn btn-success btn-lg"> <span class="glyphicon glyphicon-plus"></span> Add Request </a>
-
       </div>
 	
  </body>
+
+<footer class="navbar-default navbar-fixed-bottom">
+  <div class="container-fluid">
+    <span>Test Footer</span>
+  </div>
+</footer>
+
 </html>
