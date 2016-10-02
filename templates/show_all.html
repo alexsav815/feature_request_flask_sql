@@ -29,7 +29,12 @@
  <body>
       
       <hr/>
-     
+           
+      {%- for message in get_flashed_messages() %}
+      <div class = "alert alert-success">
+	{{ message }}
+      </div>
+      {%- endfor %}
       
       <div class="container">
 	<table class="table table-striped table-condensed">
@@ -57,16 +62,12 @@
             {% endfor %}
           </tbody>
 	</table>
+
+	<hr/>
 	
 	<a href = "{{ url_for('new') }}" class="btn btn-success btn-lg"> <span class="glyphicon glyphicon-plus"></span> Add Request </a>
 
       </div>
-      
-      <hr/>
-      
-      {%- for message in get_flashed_messages() %}
-      <p class="text-center">{{ message }}</p>
-      {%- endfor %}
 	
  </body>
 </html>
