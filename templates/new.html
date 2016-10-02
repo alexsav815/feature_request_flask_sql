@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+   <body>
+   
+      <h3>Students - Flask SQLAlchemy example</h3>
+      <hr/>
+      
+      {%- for category, message in get_flashed_messages(with_categories = true) %}
+         <div class = "alert alert-danger">
+            {{ message }}
+         </div>
+      {%- endfor %}
+      
+      <form action = "{{ request.path }}" method = "POST">
+         <label for = "title">Title</label><br>
+         <input type = "text" name = "title" placeholder = "Title" /><br>
+	 
+	 <label for = "description">Description</label><br>
+         <textarea name = "description" placeholder = "description"></textarea><br>
+
+         <label for = "client">Client</label><br>
+         <select id="client" name="client"><option value="Client A">Client A</option><option value="Client B">Client B</option><option value="Client C">Client C</option></select><br>
+         
+	 <label for="priority">Priority </label>
+         <input type="number" name="priority" id="priority" value="1" data-type="integer" min="1" max="10"><br>
+
+	 <label for="targetdate">Target Date </label>
+	 <input type="text" name="targetdate" id="targetdate" required pattern="^(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])[- /.](19|20)[0-9][0-9]$"  placeholder="MM/DD/YYYY"><br>
+	 
+	 <label for="productarea">Product Area </label>
+	 <select id="productarea" name="productarea"><option value="policies">Policies</option><option value="billing">Billing</option><option value="claims">Claims</option><option value="reports">Reports</option></select><br>
+
+         <input type = "submit" value = "Submit" />
+      </form>
+      
+   </body>
+</html>
