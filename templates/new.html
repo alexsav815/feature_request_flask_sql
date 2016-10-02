@@ -8,9 +8,22 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   </head>
   
+  <style type="text/css">
+   body { 
+     background: rgb(192,192,192) !important; 
+   } 
+   header { 
+     background: rgb(205,105,63) !important;  
+     padding-top: 5px;
+     padding-bottom: 15px;
+   }
+  </style>
+  
+  <header>
+      <h2 class="text-center" style="color:rgb(0,0,0)"> Submit New Request  </h2>
+  </header>
+
   <body>
-    
-    <h3>Submit New Request</h3>
     <hr/>
     
     {%- for category, message in get_flashed_messages(with_categories = true) %}
@@ -22,28 +35,64 @@
 	 
     
     <div class="container">
-      <form action = "{{ request.path }}" method = "POST">
-         <label for = "title">Title</label><br>
-         <input type = "text" name = "title" placeholder = "Title" /><br>
-	 
-	 <label for = "description">Description</label><br>
-         <textarea name = "description" placeholder = "description"></textarea><br>
-
-         <label for = "client">Client</label><br>
-         <select id="client" name="client"><option value="Client A">Client A</option><option value="Client B">Client B</option><option value="Client C">Client C</option></select><br>
-         
-	 <label for="priority">Priority </label>
-         <input type="number" name="priority" id="priority" value="1" data-type="integer" min="1" max="10"><br>
-
-	 <label for="targetdate">Target Date </label>
-	 <input type="text" name="targetdate" id="targetdate" required pattern="^(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])[- /.](19|20)[0-9][0-9]$"  placeholder="MM/DD/YYYY"><br>
-	 
-	 <label for="productarea">Product Area </label>
-	 <select id="productarea" name="productarea"><option value="policies">Policies</option><option value="billing">Billing</option><option value="claims">Claims</option><option value="reports">Reports</option></select><br>
-
-         <input type = "submit" value = "Submit" />
+      <form id="enter_request" action = "{{ request.path }}" method = "POST">
+	<table class="">
+          <tr>
+	    <td><label for = "title">Title</label></td>
+            <td><input type="text" name="title" id="title" required></td>
+	  </tr>
+	  <tr>
+	    <td><label for = "description">Description</label></td>
+            <td><textarea name="description" id="description" rows="5" cols="60" required></textarea></td>
+	  </tr>
+	  <tr>
+            <td><label for = "client">Client</label></td>
+            <td><select id="client" name="client"><option  value="Client A">Client A</option><option value="Client B">Client B</option><option value="Client C">Client C</option></select></td>
+          </tr>
+	  <script>
+	    $( "#client" ).attr( "value", $( "#client" ).val() );
+	  </script>
+	  <tr>
+	    <td><label for="priority">Priority </label></td>
+            <td><input type="number" name="priority" id="priority" value="1" data-type="integer" min="1" max="10"></td>
+	  </tr>
+	  <tr>
+	    <td><label for="targetdate">Target Date </label></td>
+	    <td><input type="text" name="targetdate" id="targetdate" required pattern="^(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])[- /.](19|20)[0-9][0-9]$"  placeholder="MM/DD/YYYY"></td>
+	  </tr>
+	  <tr>
+	    <td><label for="productarea">Product Area </label></td>
+	    <td><select id="productarea" name="productarea"><option value="policies">Policies</option><option value="billing">Billing</option><option value="claims">Claims</option><option value="reports">Reports</option></select></td>
+	  </tr>
+	  <script>
+	    $( "#productarea" ).attr( "value", $( "#productarea" ).val() );
+	  </script>
+	</table>
+	<hr>
+	<p>
+	  <input type = "submit" class="btn btn-primary" value = "Submit" />
+	  <button type="button" id="enter_request_reset" class="btn btn-primary">Reset to default</button>
+	</p>
       </form>
     </div>      
+
+    <script>
+     $( "#enter_request_reset" ).click( function() {
+       return enter_request_reset();
+     });
+
+     enter_request_reset = function() {
+       
+       $("#enter_request :input" ).each(function() {
+	 var t = $("#" + $( this ).attr( "id" ));
+	 //console.log ("ID: " +  "#" + $( this ).attr( "id" ) + "_msg");
+	 t.val( t.attr( "value" ) );
+	 $( "#" + $( this ).attr( "id" ) + "_msg" ).html( "" );
+       });
+       
+       return false;
+     }
+    </script>  
 
    </body>
 </html>
