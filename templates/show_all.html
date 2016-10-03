@@ -36,24 +36,32 @@
      color: rgb( 255,255,255 );
      text-decoration: none;
    }
-
-   .table-fixed thead{
-     width: 97%;
+   
+   td {
+     text-align : center;
    }
-   .table-fixed tbody{
-     height: 230px;
-     overflow-y: auto;
+   th {
+     text-align : center;
+   }
+   tr {
      width: 100%;
+     display: inline-table;
+     table-layout: fixed;
    }
-   .table-fixed thead, .table-fixed tbody, .table-fixed tr, .table-fixed td, .table-fixed th {
+   
+   table{
+     height:350px;              // <-- Select the height of the table
+     display: -moz-groupbox;    // Firefox Bad Effect
+   }
+   tbody{
+     overflow-y: auto;      
+     height: 320px;            //  <-- Select the height of the body
+     width: 100%;
+     //position: absolute;
      display: block;
-   } 
-
-   .table-fixed tbody td, .table-fixed thead > tr> th {
-     float: left;
-     border-bottom-width: 0;
    }
-
+   
+   
   </style>
   
 
@@ -73,9 +81,9 @@
       </div>
       {%- endfor %}
       
-      <div class="container" style="height:350px;overflow:auto" >
+      <div class="container">
 	<table class="table table-striped table-condensed table-responsive" >
-          <thead>
+          <thead style="background-color:red">
             <tr>
               <th>Title</th>
               <th>Description</th>
@@ -99,13 +107,11 @@
             {% endfor %}
           </tbody>
 	</table>
+	<div  style="height:100px">
+	  <a href = "{{ url_for('new') }}" class="btn btn-success btn-lg"> <span class="glyphicon glyphicon-plus"></span> Add Request </a>
+	</div>
       </div>
-      
-      <hr/>
-      
-      <div class="container" style="height:100px">
-	<a href = "{{ url_for('new') }}" class="btn btn-success btn-lg"> <span class="glyphicon glyphicon-plus"></span> Add Request </a>
-      </div>
+
 	
  </body>
 
