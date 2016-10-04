@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="static/js/tablesorter-master/jquery-latest.js"></script> 
     <script type="text/javascript" src="static/js/tablesorter-master/jquery.tablesorter.js"></script> 
@@ -62,7 +63,15 @@
      display: block;
    }
    
+   .hoverhighlight {
+     text-align: center;
+     color: rgb(#363535);
+   }
    
+   .hoverhighlight:hover {
+     color:  rgb(255,255,255);
+   } 
+
   </style>
   
 
@@ -72,80 +81,90 @@
     </h2>
   </header>
  
- <body>
+  <body>
+    
+    <hr/>
+    
+    {%- for message in get_flashed_messages() %}
+    <div class = "alert alert-success">
+      {{ message }}
+    </div>
+    {%- endfor %}
+    
+    <div class="container">
+      <table id="myTable" class="table table-striped table-condensed table-responsive tablesorter" >
+        <thead style="background-color:rgb(255,102,102)">
+          <tr>
+            <th class="hoverhighlight">Title</th>
+            <th class="hoverhighlight">Description</th>
+            <th class="hoverhighlight">Client</th>
+            <th class="hoverhighlight">Priority</th>
+	    <th class="hoverhighlight">Target Date</th>
+	    <th class="hoverhighlight">Product Area</th>
+          </tr>
+        </thead>
+        
+        <tbody>
+          {% for request in feature_request %}
+          <tr>
+            <td>{{ request.title }}</td>
+            <td>{{ request.description }}</td>
+            <td>{{ request.client }}</td>
+            <td>{{ request.priority }}</td>
+	    <td>{{ request.targetdate }}</td>
+	    <td>{{ request.productarea }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
       
-      <hr/>
-           
-      {%- for message in get_flashed_messages() %}
-      <div class = "alert alert-success">
-	{{ message }}
-      </div>
-      {%- endfor %}
-      
-      <div class="container">
-	<table id="myTable" class="table table-striped table-condensed table-responsive tablesorter" >
-          <thead style="background-color:rgb(255,102,102)">
-            <tr>
-              <th>Title</th>
-              <th>Description</th>
-              <th>Client</th>
-              <th>Priority</th>
-	      <th>Target Date</th>
-	      <th>Product Area</th>
-            </tr>
-          </thead>
-          
-          <tbody>
-            {% for request in feature_request %}
-            <tr>
-              <td>{{ request.title }}</td>
-              <td>{{ request.description }}</td>
-              <td>{{ request.client }}</td>
-              <td>{{ request.priority }}</td>
-	      <td>{{ request.targetdate }}</td>
-	      <td>{{ request.productarea }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-	</table>
-	
-
-	<div class="row">
-          <div style="height:80px" class="col-xs-2">
-            <a href = "{{ url_for('new') }}" class="btn btn-success btn-lg"> <span class="glyphicon glyphicon-plus"></span> Add Request </a>
-          </div>
-          
-	  <div style="height:80px" class="col-xs-10">
-            <button id="sort-link" class="btn btn-primary btn-lg"> <span class="glyphicon glyphicon-sort-by-alphabet glyphicon-sort-by-order"></span> Sort by Client&Priority </button>
-          </div>
-	  
+      <div class="row" style="height:10px">
+	<div class="col-xs-8">
+	</div>
+	<div class="col-xs-4">
+	  <span style="color:blue">*Click on the column headers to sort individual columns</span>
 	</div>
 	
       </div>
-
-      <script>
-       
-       //$(document).ready(function() 
-	// { 
-         //  $("#myTable").tablesorter( {sortList: [[0,0], [1,0]]} ); 
-	 //} 
-      // ); 
-    
-       $("#sort-link").click(function() { 
-         // set sorting column and direction, this will sort on the third ([2,0]) and forth ([3,0]) column the column index starts at zero 
-         // sort on the first column 
-         $("table").tablesorter( {sortList: [[2,0], [3,0]]} ); 
-         return false; 
-       }); 
-
-      </script>
+      
+      <div class="row">
+        <div style="height:80px" class="col-xs-2">
+          <a href = "{{ url_for('new') }}" class="btn btn-success btn-lg"> <span class="glyphicon glyphicon-plus"></span> Add Request </a>
+        </div>
+        
+	<div style="height:80px" class="col-xs-10">
+          <button id="sort-link" class="btn btn-primary btn-lg"> <span class="glyphicon glyphicon-sort-by-order"></span> Sort by Client & Priority </button>
+        </div>
 	
- </body>
-
-<footer class="navbar-default navbar-fixed-bottom">
-  <div class="container-fluid">
-    <span>Test Footer</span>
-  </div>
-</footer>
-
+      </div>
+      
+    </div>
+    
+    <script>
+     
+     $(document).ready(function() 
+       { 
+         $("#myTable").tablesorter(); 
+       } 
+     ); 
+     
+     $("#sort-link").click(function() { 
+       // set sorting column and direction, this will sort on the third ([2,0]) and forth ([3,0]) column the column index starts at zero 
+       // sort on the first column 
+       //$("#myTable").tablesorter( {sortList: [[2,0], [3,0]]} ); 
+       var sorting = [[2,0],[3,0]]; 
+       $("table").trigger("sorton",[sorting]); 
+       return false; 
+     }); 
+     
+    </script>
+    
+  </body>
+  
+  <footer class="navbar-default navbar-fixed-bottom">
+    <div class="container-fluid">
+      <span>Test Footer</span>
+    </div>
+  </footer>
+  
 </html>
