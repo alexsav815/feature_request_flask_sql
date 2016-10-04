@@ -10,9 +10,10 @@ The web application utilizes the following stack: <br>
  5)   MVVM: Knockout.js <br>
  6)   CSS: Bootstrap 4 or similar <br>
 
-Currently, it's in a state of infancy, but enables adding a new request and showinf all requests..
+What it currenlty does: 
+<br> Shows all enties with possibility of sorting by a bundle of 'Clinet/Priority'
+<br> Enter new request with the on-fly update of priorities for the same client 
 
-<br> Not sorting of priorities yet..
 
 <br> Run on localhost:5000
 
