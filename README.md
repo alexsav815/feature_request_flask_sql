@@ -14,7 +14,7 @@ What it currenlty does:
 <br> Shows all enties with possibility of sorting by a bundle of 'Clinet/Priority'
 <br> Enter new request with the on-fly update of priorities for the same client 
 
-
 <br> Run on localhost:5000
 
+<br> Tested on Firefox, Chrome
  
