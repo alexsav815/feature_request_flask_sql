@@ -12,7 +12,7 @@ class feature_request(db.Model):
    title        = db.Column(db.String(100))
    description  = db.Column(db.String(50))
    client       = db.Column(db.String(200)) 
-   priority     = db.Column(db.String(10))
+   priority     = db.Column(db.Integer(10))
    targetdate   = db.Column(db.String(10))
    productarea  = db.Column(db.String(10))
 
@@ -37,6 +37,15 @@ def new():
       else:
          current_request = feature_request(request.form['title'], request.form['description'], request.form['client'], request.form['priority'], request.form['targetdate'], request.form['productarea'])
          
+         #client_current = db.session.query(feature_request).filter(feature_request.client==request.form['client'], feature_request.priority >= request.form['priority'] ).all()
+         #print ("out: ", client_current[-1].priority)
+         #print ("out: ", len(client_current))
+         
+         entry_check = db.session.query(feature_request).filter(feature_request.client == request.form['client'], feature_request.priority == request.form['priority']).all()
+         
+         if (len(entry_check)):
+            db.session.query(feature_request).filter(feature_request.client == request.form['client']).filter(feature_request.priority >= int(request.form['priority'])).update({'priority': feature_request.priority + 1}, synchronize_session='evaluate')
+
          db.session.add(current_request)
          db.session.commit()
          flash('Request entry has been successfully added to database...')

@@ -4,8 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="static/js/tablesorter-master/jquery-latest.js"></script> 
+    <script type="text/javascript" src="static/js/tablesorter-master/jquery.tablesorter.js"></script> 
   </head>
   
   <style type="text/css">
@@ -67,7 +68,7 @@
 
   <header>
     <h2 class="text-center" >
-      <a href = "{{ url_for('show_all') }}" class="title">Feature Request - PreAlpha</a>
+      <a href = "{{ url_for('show_all') }}" target="_blank" class="title">Feature Request - PreAlpha</a>
     </h2>
   </header>
  
@@ -82,8 +83,8 @@
       {%- endfor %}
       
       <div class="container">
-	<table class="table table-striped table-condensed table-responsive" >
-          <thead style="background-color:red">
+	<table id="myTable" class="table table-striped table-condensed table-responsive tablesorter" >
+          <thead style="background-color:rgb(255,102,102)">
             <tr>
               <th>Title</th>
               <th>Description</th>
@@ -107,11 +108,37 @@
             {% endfor %}
           </tbody>
 	</table>
-	<div  style="height:100px">
-	  <a href = "{{ url_for('new') }}" class="btn btn-success btn-lg"> <span class="glyphicon glyphicon-plus"></span> Add Request </a>
+	
+
+	<div class="row">
+          <div style="height:80px" class="col-xs-2">
+            <a href = "{{ url_for('new') }}" class="btn btn-success btn-lg"> <span class="glyphicon glyphicon-plus"></span> Add Request </a>
+          </div>
+          
+	  <div style="height:80px" class="col-xs-10">
+            <button id="sort-link" class="btn btn-primary btn-lg"> <span class="glyphicon glyphicon-sort-by-alphabet glyphicon-sort-by-order"></span> Sort by Client&Priority </button>
+          </div>
+	  
 	</div>
+	
       </div>
 
+      <script>
+       
+       //$(document).ready(function() 
+	// { 
+         //  $("#myTable").tablesorter( {sortList: [[0,0], [1,0]]} ); 
+	 //} 
+      // ); 
+    
+       $("#sort-link").click(function() { 
+         // set sorting column and direction, this will sort on the third ([2,0]) and forth ([3,0]) column the column index starts at zero 
+         // sort on the first column 
+         $("table").tablesorter( {sortList: [[2,0], [3,0]]} ); 
+         return false; 
+       }); 
+
+      </script>
 	
  </body>
 
