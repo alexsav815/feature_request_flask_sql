@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 from flask import Flask, request, flash, url_for, redirect, render_template
 from flask_sqlalchemy import SQLAlchemy
@@ -14,7 +14,8 @@ class feature_request(db.Model):
    title        = db.Column(db.String(100))
    description  = db.Column(db.String(50))
    client       = db.Column(db.String(200)) 
-   priority     = db.Column(db.Integer(10))
+   #priority     = db.Column(db.Integer(10))
+   priority     = db.Column(db.Integer)
    targetdate   = db.Column(db.String(10))
    productarea  = db.Column(db.String(10))
 
