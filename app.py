@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from flask import Flask, request, flash, url_for, redirect, render_template
 from flask_sqlalchemy import SQLAlchemy
 
