@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang = "en">
+  <head> 
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="static/js/tablesorter-master/jquery-latest.js"></script> 
+    <script type="text/javascript" src="static/js/tablesorter-master/jquery.tablesorter.js"></script> 
+  </head>
+
+  <style type="text/css">
+   body { 
+     background: rgb(192,192,192) !important; 
+   } 
+   header { 
+     background: rgb(205,105,63) !important;  
+     padding-top: 1px;
+     padding-bottom: 10px;
+   }
+   .title {
+     text-decoration: none;
+     outline: 0;
+   }
+   .title:link {
+     color: rgb( 220,210,210 );
+   }
+   
+   .title:visited {
+     color: rgb( 0,0,0 );
+   }
+   
+   .title:active {
+     color: rgb( 220,210,210 );
+   }
+   .title:hover {
+     color: rgb( 255,255,255 );
+     text-decoration: none;
+   }
+   
+   td {
+     text-align : center;
+   }
+   th {
+     text-align : center;
+   }
+   tr {
+     width: 100%;
+     display: inline-table;
+     table-layout: fixed;
+   }
+   
+   table{
+     height:350px;              // <-- Select the height of the table
+     display: -moz-groupbox;    // Firefox Bad Effect
+   }
+   tbody{
+     overflow-y: auto;      
+     height: 320px;            //  <-- Select the height of the body
+     width: 100%;
+     //position: absolute;
+     display: block;
+   }
+   
+   .hoverhighlight {
+     text-align: center;
+     color: rgb(#363535);
+   }
+   
+   .hoverhighlight:hover {
+     color:  rgb(255,255,255);
+   } 
+
+  </style>
+ 
+
+   <header>
+    <h2 class="text-center" >
+      <a href = "/" target="_blank" class="title">Feature Request - PreAlpha</a>
+    </h2>
+  </header>
+
+  {%- for message in get_flashed_messages() %}
+  <div class = "alert alert-success">
+    {{ message }}
+  </div>
+  {%- endfor %}
+  
+ 
+  <div class="container-fluid">
+    <ul class="nav">
+      <li class="active"><a href="/">Home</a></li>
+      {% if g.user.is_authenticated %}
+      <li><a href="{{ url_for('logout') }}">Logout</a></li>
+      {% endif %}
+      {% if not g.user.is_authenticated %}
+      <li><a href="{{ url_for('login') }}">Login</a></li>
+      <li><a href="{{ url_for('register') }}">Register</a></li>
+      {% endif %}
+    </ul>
+  </div>
+
+ 
+  {% block body %}{% endblock %}
+
+
+  <footer class="navbar-default navbar-fixed-bottom">
+    <div class="container-fluid">
+      <span>Test Footer</span>
+    </div>
+  </footer>
+
+</html>

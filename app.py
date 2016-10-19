@@ -1,7 +1,14 @@
-from flask import Flask, request, flash, url_for, redirect, render_template
+from flask import Flask, request, flash, url_for, redirect, render_template, session, g
+from flask.ext.login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime, timedelta
+
 
 app = Flask(__name__)
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///clinets.sqlite3'
 app.config['SECRET_KEY'] = "random string"
 
@@ -24,12 +31,98 @@ class feature_request(db.Model):
       self.priority    = priority
       self.targetdate  = targetdate
       self.productarea = productarea
+
+
+class User(db.Model):
+   __tablename__ = "User"
+   id = db.Column('user_id',db.Integer , primary_key=True)
+   username = db.Column('username', db.String(20), unique=True , index=True)
+   password = db.Column('password' , db.String(10))
+   email = db.Column('email',db.String(50),unique=True , index=True)
+   registered_on = db.Column('registered_on' , db.DateTime())
+ 
+   def __init__(self , username ,password , email):
+      self.username = username
+      self.password = password
+      self.email = email
+      self.registered_on = datetime.utcnow()
+      
+   def is_authenticated(self):
+      return True
+      
+   def is_active(self):
+      return True
+ 
+   def is_anonymous(self):
+      return False
+ 
+   def get_id(self):
+      try:
+         return unicode(self.id)  # python 2
+      except NameError:
+         return str(self.id)  # python 3
+       
+   def __repr__(self):
+      return '<User %r>' % (self.username)
+
+
+@login_manager.user_loader
+def load_user(id):
+   try:
+      return User.query.get(int(id))
+   except:
+      return None
+
+
+@app.before_request
+def before_request():
+    g.user = current_user
+
+@app.route('/register' , methods=['GET','POST'])
+def register():
+    if request.method == 'GET':
+        return render_template('register.html')
+    user = User(request.form['username'] , request.form['password'],request.form['email'])
+    #user = User(request.form['username'] , request.form['password'])
+    db.session.add(user)
+    db.session.commit()
+    flash('User successfully registered')
+    return redirect(url_for('login'))
+
+@app.route('/login', methods=['GET','POST'])
+def login():
+   if request.method == 'GET':
+      return render_template('login.html')
+   username = request.form['username']
+   password = request.form['password']
+   registered_user = User.query.filter_by(username=username,password=password).first()
+   if registered_user is None:
+      flash('Username or Password is invalid' , 'error')
+      return redirect(url_for('login'))
+   login_user(registered_user)
+   flash('Logged in successfully')
+   return redirect(request.args.get('next') or url_for('show_all'))
+
+
+@app.route('/logout')
+def logout():
+   user = g.user
+   logout_user()
+   return redirect(url_for('index')) 
    
 @app.route('/')
+@app.route('/index')
+def index():
+   user = g.user
+   return render_template('index.html', user=user)
+
+@app.route('/show_all')
+@login_required
 def show_all():
    return render_template('show_all.html', feature_request = feature_request.query.all() )
 
 @app.route('/new', methods = ['GET', 'POST'])
+@login_required
 def new():
    if request.method == 'POST':
       #print (request.form['title'])
