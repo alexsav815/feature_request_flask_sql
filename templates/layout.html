@@ -1,23 +1,24 @@
 <!DOCTYPE html>
 <html lang = "en">
   <head> 
-    <meta charset="utf-8"/>
+    <meta charset="ISO-8859-1"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="static/js/tablesorter-master/jquery-latest.js"></script> 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script type="text/javascript" src="static/js/tablesorter-master/jquery.tablesorter.js"></script> 
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
   </head>
 
   <style type="text/css">
    body { 
-     background: rgb(192,192,192) !important; 
+     background-color: rgb(192,192,192) !important; 
    } 
    header { 
-     background: rgb(205,105,63) !important;  
-     padding-top: 1px;
-     padding-bottom: 10px;
+     background-color: rgb(205,105,63) !important;  
+     height: 65px;
+    
    }
    .title {
      text-decoration: none;
@@ -39,9 +40,10 @@
      text-decoration: none;
    }
    
-   td {
-     text-align : center;
+   .pagetitle {
+     z-index: 1;
    }
+      
    th {
      text-align : center;
    }
@@ -52,7 +54,7 @@
    }
    
    table{
-     height:350px;              // <-- Select the height of the table
+     height:300px;              // <-- Select the height of the table
      display: -moz-groupbox;    // Firefox Bad Effect
    }
    tbody{
@@ -71,36 +73,100 @@
    .hoverhighlight:hover {
      color:  rgb(255,255,255);
    } 
+   .hoverhighlight1 {
+     text-align: center;
+     color: blue;
+   }
+   
+   .hoverhighlight1:hover {
+     color:  rgb(255,255,255);
+   } 
+
+   .modal-header{
+     background-color:blue;
+   }
+   .modal-body{
+     background-color:#C0C0C0;
+   }
+   .modal-footer {
+     border-top: 2px solid #000000;
+   }
+
+   .modal {
+     text-align: center;
+     padding: 0!important;
+   }
+   
+   .modal:before {
+     content: '';
+     display: inline-block;
+     height: 100%;
+     vertical-align: middle;
+     margin-right: -4px; /* Adjusts for spacing */
+   }
+
+   .modal-dialog {
+     display: inline-block;
+     text-align: center;
+     vertical-align: middle;
+   }
+   
+   hr {
+    height: 2px;
+    background-color:#555;
+    margin-top: 20px;
+    margin-bottom: 20px;
+   }
 
   </style>
  
 
    <header>
-    <h2 class="text-center" >
-      <a href = "/" target="_blank" class="title">Feature Request - PreAlpha</a>
-    </h2>
-  </header>
+
+     <span class="pagetitle"><h2 class="text-center"> <a href = "/show_all" target="_blank" class="title">Feature Request - PreAlpha</a> </h2></span>
+            
+     {% if g.user.is_authenticated %}
+     <div>
+       <table class="table-condensed">
+	 <tr>
+	   <td style="text-align:right">
+	     <a href = "{{ url_for('show_all') }}" class="hoverhighlight1"> <span class="glyphicon glyphicon-home"> Home </span> </a>
+	   </td>
+	 </tr>
+	 <tr>
+	   <td style="text-align:right">
+	     <a href = "{{ url_for('logout') }}" class="hoverhighlight1"> <span class="glyphicon glyphicon-log-out"> Logout </span> </a>
+	   </td>
+	 </tr>
+       </table>
+     </div>
+     {% endif %}
+     
+   </header>
 
   {%- for message in get_flashed_messages() %}
   <div class = "alert alert-success">
     {{ message }}
   </div>
   {%- endfor %}
-  
- 
-  <div class="container-fluid">
-    <ul class="nav">
-      <li class="active"><a href="/">Home</a></li>
-      {% if g.user.is_authenticated %}
-      <li><a href="{{ url_for('logout') }}">Logout</a></li>
-      {% endif %}
-      {% if not g.user.is_authenticated %}
-      <li><a href="{{ url_for('login') }}">Login</a></li>
-      <li><a href="{{ url_for('register') }}">Register</a></li>
-      {% endif %}
-    </ul>
-  </div>
+   
 
+  <script>
+   $(function() {
+     $('.pagetitle').css({
+       'position' : 'absolute',
+       'left' : '50%',
+       'top' : '0%'
+     });
+     $('.pagetitle h2').css({
+       'position' : 'relative',
+       'top'      : -$('.pagetitle').outerHeight() / 11,
+       'left'     : -$('.pagetitle').outerWidth() / 2
+     });
+   });
+  </script>
+
+  
  
   {% block body %}{% endblock %}
 
@@ -110,5 +176,6 @@
       <span>Test Footer</span>
     </div>
   </footer>
+
 
 </html>

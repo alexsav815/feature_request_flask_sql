@@ -1,5 +1,5 @@
 Flask==0.10.1
 Flask-SQLAlchemy==1.0
-##Flask==0.8
-##Flask-SQLAlchemy==2.1
+Flask-Login==0.3.2
+Werkzeug==0.9.4
 gunicorn==19.6.0

@@ -1,5 +1,6 @@
 from flask import Flask, request, flash, url_for, redirect, render_template, session, g
-from flask.ext.login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
+#from flask.ext.login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
+from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 
@@ -73,7 +74,6 @@ def load_user(id):
    except:
       return None
 
-
 @app.before_request
 def before_request():
     g.user = current_user
@@ -83,7 +83,6 @@ def register():
     if request.method == 'GET':
         return render_template('register.html')
     user = User(request.form['username'] , request.form['password'],request.form['email'])
-    #user = User(request.form['username'] , request.form['password'])
     db.session.add(user)
     db.session.commit()
     flash('User successfully registered')
