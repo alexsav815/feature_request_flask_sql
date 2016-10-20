@@ -4,6 +4,10 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, curren
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 
+from flask_wtf import FlaskForm
+from wtforms import Form, BooleanField, StringField, PasswordField, validators
+from wtforms.validators import DataRequired, Length
+
 
 app = Flask(__name__)
 login_manager = LoginManager()
@@ -36,13 +40,13 @@ class feature_request(db.Model):
 
 class User(db.Model):
    __tablename__ = "User"
-   id = db.Column('user_id',db.Integer , primary_key=True)
-   username = db.Column('username', db.String(20), unique=True , index=True)
-   password = db.Column('password' , db.String(10))
-   email = db.Column('email',db.String(50),unique=True , index=True)
-   registered_on = db.Column('registered_on' , db.DateTime())
+   id = db.Column('user_id', db.Integer, primary_key=True)
+   username = db.Column('username', db.String(20), nullable=False, unique=True, index=True)
+   password = db.Column('password', db.String(10), nullable=False)
+   email = db.Column('email', db.String(50), unique=True, nullable=False, index=True)
+   registered_on = db.Column('registered_on', db.DateTime())
  
-   def __init__(self , username ,password , email):
+   def __init__(self, username, password, email):
       self.username = username
       self.password = password
       self.email = email
@@ -67,6 +71,11 @@ class User(db.Model):
       return '<User %r>' % (self.username)
 
 
+class UserForm(Form):
+   username = StringField('username', validators=[DataRequired(), Length(max=255)])
+   email = StringField('Email', validators=[DataRequired(), Length(max=255)])
+   
+
 @login_manager.user_loader
 def load_user(id):
    try:
@@ -80,13 +89,24 @@ def before_request():
 
 @app.route('/register' , methods=['GET','POST'])
 def register():
-    if request.method == 'GET':
-        return render_template('register.html')
-    user = User(request.form['username'] , request.form['password'],request.form['email'])
-    db.session.add(user)
-    db.session.commit()
-    flash('User successfully registered')
-    return redirect(url_for('login'))
+   if request.method == 'GET':
+      return render_template('register.html')
+   username = request.form['username']
+   email = request.form['email']
+   form = UserForm(request.form)
+   registered_username = User.query.filter_by(username=username).first()
+   registered_email = User.query.filter_by(email=email).first()
+   
+
+   if request.method == 'POST' and form.validate() and registered_username is None and registered_email is None:
+      user = User(request.form['username'] , request.form['password'], request.form['email'])
+      db.session.add(user)
+      db.session.commit()
+      flash('User successfully registered')
+      return redirect(url_for('login'))
+   flash('Registration failed...')
+   return render_template('register.html', form=form)
+
 
 @app.route('/login', methods=['GET','POST'])
 def login():
