@@ -1,4 +1,4 @@
-from flask import Flask, request, flash, url_for, redirect, render_template, session, g
+from flask import Flask, request, flash, url_for, redirect, render_template, session, g, make_response
 #from flask.ext.login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
 from flask_sqlalchemy import SQLAlchemy
@@ -16,6 +16,7 @@ login_manager.login_view = 'login'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///clinets.sqlite3'
 app.config['SECRET_KEY'] = "random string"
+#app.config['SESSION_COOKIE_SECURE'] = True
 
 db = SQLAlchemy(app)
 
@@ -73,8 +74,11 @@ class User(db.Model):
 
 class UserForm(Form):
    username = StringField('username', validators=[DataRequired(), Length(max=255)])
-   email = StringField('Email', validators=[DataRequired(), Length(max=255)])
+   email = StringField('email', validators=[DataRequired(), Length(max=255)])
+   #password = PasswordField('password', [validators.DataRequired(), validators.EqualTo('password1', message='Passwords must match')])
+   #password1 = PasswordField('Repeat Password')
    
+#login_manager.session_protection = "strong"
 
 @login_manager.user_loader
 def load_user(id):
@@ -85,26 +89,44 @@ def load_user(id):
 
 @app.before_request
 def before_request():
-    g.user = current_user
+   g.user = current_user
+
+def regLog(message, category):
+   flash(message, category)
+   return render_template("register.html")
+
+def logLog(message, category):
+   flash(message, category)
+   return render_template("login.html")
 
 @app.route('/register' , methods=['GET','POST'])
 def register():
    if request.method == 'GET':
       return render_template('register.html')
    username = request.form['username']
+   password = request.form['password']
+   password1 = request.form['password1']
+   if password != password1:
+      return regLog("<strong>Error!</strong> Passwords did not match. Please enter passwords again...", 'danger')
    email = request.form['email']
+   email1 = request.form['email1']
+   if email != email1:
+      return regLog("<strong>Error!</strong> Email addresses did not match. Please enter e-mailss again...", 'danger')
    form = UserForm(request.form)
    registered_username = User.query.filter_by(username=username).first()
-   registered_email = User.query.filter_by(email=email).first()
-   
+   registered_email = User.query.filter_by(email=email1).first()
+   if registered_username is not None:
+      return regLog("<strong>Error!</strong> Username is already used. Please chose different username...",'danger')
+   if registered_email is not None:
+      return regLog("<strong>Error!</strong> E-mail entered is already used. Please enter different e-mail...",'danger')
 
-   if request.method == 'POST' and form.validate() and registered_username is None and registered_email is None:
-      user = User(request.form['username'] , request.form['password'], request.form['email'])
+   if request.method == 'POST' and form.validate():
+      user = User(request.form['username'] , request.form['password1'], request.form['email1'])
       db.session.add(user)
       db.session.commit()
-      flash('User successfully registered')
+      return regLog("User successfully registered! You may now  <a href = \"login\"> Login </a>",'success')
       return redirect(url_for('login'))
-   flash('Registration failed...')
+   return regLog('<strong>Error!</strong> Registration failed...', 'danger')
    return render_template('register.html', form=form)
 
 
@@ -116,10 +138,10 @@ def login():
    password = request.form['password']
    registered_user = User.query.filter_by(username=username,password=password).first()
    if registered_user is None:
-      flash('Username or Password is invalid' , 'error')
+      return logLog('<strong>Error!</strong> Username or Password is invalid', 'danger')
       return redirect(url_for('login'))
    login_user(registered_user)
-   flash('Logged in successfully')
+   #return logLog("Logged in successfully. You may now  <a href = \"show_all\"> proceed </a>", 'success')
    return redirect(request.args.get('next') or url_for('show_all'))
 
 
@@ -133,6 +155,9 @@ def logout():
 @app.route('/index')
 def index():
    user = g.user
+   #resp = make_response(render_template('index.html', user=user))
+   #resp.set_cookie('PHPSESSID', '')
+   #return resp
    return render_template('index.html', user=user)
 
 @app.route('/show_all')

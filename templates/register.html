@@ -2,7 +2,7 @@
 {% block body %}
 
 <div class="modal fade" id="myModal_register" role="dialog">
-  <div class="modal-dialog modal-sm">
+  <div class="modal-dialog modal-md">
     
     <!-- Modal content-->
     <div class="modal-content">
@@ -10,50 +10,119 @@
 	<h3 class="modal-title" style="text-align:center;color:white"> Register </h3>        
       </div>
       
-      <div class="modal-body">
+      <div class="modal-body" align="center">
 	
-	<form action="" method=post class="form-horizontal">
-	  <div class="control-group">
-            <div class="controls">
-              <input type="text" id="username" name="username" class="input-xlarge" placeholder="Enter Username" value="{{ request.form.username }}" required>
+	<form action="/register" method=post id="regform" class="form-horizontal">
+	  <div class="row" style="width:70%">
+            <div align="left" class="col-sm-6">
+	      <label for = "username">Username</label>
+	    </div>
+	    <div align="left" class="col-sm-6">
+              <input type="text" id="username" name="username" class="input-xlarge" placeholder="Enter username" value="" required>
+            </div>
+	  </div>
+	
+	  <div class="row" style="width:70%">
+            <div align="left" class="col-sm-6">
+	      <label for = "password">Password</label>
+	    </div>
+	    <div align="left" class="col-sm-6">
+              <input type="password" id="password" name="password" class="input-xlarge" placeholder="Enter password" value="" required>
             </div>
 	  </div>
 	  
-	  <div class="control-group">
-            <div class="controls">
-              <input type="password" id="password" name="password" class="input-xlarge" placeholder="Enter Password" value="{{ request.form.password }}" required>
+	  <div class="row" style="width:70%">
+            <div align="left" class="col-sm-6">
+	      <label for = "password1">Repeat Password</label>
+	    </div>
+	    <div align="left" class="col-sm-6">
+              <input type="password" id="password1" name="password1" class="input-xlarge" placeholder="Repeat password" value="" required>
             </div>
 	  </div>
-	  
-	  <div class="control-group">
-            <div class="controls">
-              <input type="email" id="email" name="email" class="input-xlarge" placeholder="Enter Email" value="{{ request.form.username }}" required>
-            </div>
-	  </div>
-	  
 
-	  <hr/>
-	  <div class="row">
-	    <div align="center" style="height:70px" class="col-xs-6">
+	  
+	  <div class="row" style="width:70%">
+            <div align="left" class="col-sm-6">
+	      <label for = "email">E-mail Address</label>
+	    </div>
+	    <div align="left" class="col-sm-6">
+              <input type="email" id="email" name="email" class="input-xlarge" placeholder="Enter valid e-mail address" value="" required>
+            </div>
+	  </div>
+
+	  <div class="row" style="width:70%">
+            <div align="left" class="col-sm-6">
+	      <label for = "email1">Repeat E-mail Address</label>
+	    </div>
+	    <div align="left" class="col-sm-6">
+              <input type="email" id="email1" name="email1" class="input-xlarge" placeholder="Repeat e-mail address" value="" required>
+            </div>
+	  </div>
+	    
+
+	  <br>
+	  <div class="row" style="width:70%">
+	    <div align="center" style="height:70px" class="col-sm-4">
 	      <button type="submit" class="btn btn-success btn-md"><span class="glyphicon glyphicon-registration-mark"></span> Register </button>
             </div>
-	    <div align="center" style="height:70px" class="col-xs-6">
+	    <div align="center" style="height:70px" class="col-sm-4">
+	      <button type="button" id="registration_reset" class="btn btn-primary"> Reset Form </button>
+            </div>
+	    <div align="center" style="height:70px" class="col-sm-4">
 	      <a href = "{{ url_for('index') }}" class="btn btn-primary btn-md"> <span></span> Cancel </a>
             </div>
 	  </div>
 	
 	</form>
 	
+	<div class="modal-footer">
+	  {%- with messages = get_flashed_messages(with_categories=true) -%}
+	  {%- if messages -%}
+	  {%- for category, message in messages -%}
+	  
+	  <div align="center" class = "alert alert-{{category}}">
+            {{ message|safe }}
+          </div>
+	  
+	  {%- endfor -%}
+	  {%- endif -%}
+	  {%- endwith %}
+	</div>	
+
       </div>
     </div>
   </div>
 </div>
 
 
+<script>
+ $( "#registration_reset" ).click( function() {
+   return reg_reset();
+ });
+ 
+ reg_reset = function() {
+   $("#regform :input" ).each(function() {
+     var t = $("#" + $( this ).attr( "id" ));
+     //console.log ("ID: " +  "#" + $( this ).attr( "id" ) + "_msg");
+     t.val( t.attr( "value" ) );
+     console.log ("ID: " + "#" + $( this ).attr( "id" ));
+     console.log ("Value: " + t.attr( "value" ));
+     //$( "#" + $( this ).attr( "id" ) + "_msg" ).html( "" );
+   });
+   return false;
+ }
+
+ 
+</script>  
+
 <script type="text/javascript">
  $(document).ready(function () {
    $('#myModal_register').modal({backdrop: 'static', keyboard: false, show: true});
  });
 </script>
+
+
+
+
 
 {% endblock %}

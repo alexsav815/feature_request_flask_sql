@@ -11,21 +11,26 @@
       </div>
       
       <div class="modal-body">
-	
 	<form action="" method=post class="form-horizontal">
-	  <div class="control-group">
-            <div class="controls">
-              <input type="text" id="username" name="username"  placeholder="Enter Username" required>
+	  <div class="row" style="width:60%">
+            <div align="left" class="col-sm-6">
+	      <label for = "username">Username</label>
+	    </div>
+	    <div align="left" class="col-sm-6">
+              <input type="text" id="username" name="username" class="input-xlarge" placeholder="Enter username" value="" required>
             </div>
 	  </div>
 	  
-	  <div class="control-group">
-            <div class="controls">
-              <input type="password" id="password" name="password"  placeholder="Enter Password" required>
+	  <div class="row" style="width:60%">
+            <div align="left" class="col-sm-6">
+	      <label for = "password">Password</label>
+	    </div>
+	    <div align="left" class="col-sm-6">
+              <input type="password" id="password" name="password" class="input-xlarge" placeholder="Enter password" value="" required>
             </div>
 	  </div>
-	  
-	  <hr/>
+
+	  <br>
 	  <div class="row">
 	    <div align="center" style="height:70px" class="col-xs-6">
 	      <button type="submit" class="btn btn-success btn-md"><span class="glyphicon glyphicon-log-in"></span> Sign In </button>
@@ -34,11 +39,23 @@
 	      <a href = "{{ url_for('index') }}" class="btn btn-primary btn-md"> <span></span> Cancel </a>
             </div>
 	  </div>
-	      
-	  </div>
+	       
 	</form>
+	
+	<div class="modal-footer">
+	  {%- with messages = get_flashed_messages(with_categories=true) -%}
+	  {%- if messages -%}
+	  {%- for category, message in messages -%}
+	  <div align="center" class = "alert alert-{{category}}">
+            {{ message|safe }}
+          </div>
+	  
+	  {%- endfor -%}
+	  {%- endif -%}
+	  {%- endwith %}
+	</div> 
 
-
+	
       </div>
     </div>
   </div>
@@ -50,5 +67,6 @@
    $('#myModal_login').modal({backdrop: 'static', keyboard: false, show: true});
  });
 </script>
+
 
 {% endblock %}

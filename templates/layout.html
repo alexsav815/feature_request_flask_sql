@@ -123,7 +123,7 @@
 
    <header>
 
-     <span class="pagetitle"><h2 class="text-center"> <a href = "/show_all" target="_blank" class="title">Feature Request - PreAlpha</a> </h2></span>
+     <span class="pagetitle"><h2 class="text-center"> <a href = "/show_all" target="_blank" class="title">Feature Request - Alpha</a> </h2></span>
             
      {% if g.user.is_authenticated %}
      <div>
@@ -135,7 +135,7 @@
 	 </tr>
 	 <tr>
 	   <td style="text-align:right">
-	     <a href = "{{ url_for('logout') }}" class="hoverhighlight1"> <span class="glyphicon glyphicon-log-out"> Logout </span> </a>
+	     <a href = "{{ url_for('logout') }}" class="hoverhighlight1"> <span class="glyphicon glyphicon-log-out"> Logout <i>{{g.user.username}}</i> </span> </a>
 	   </td>
 	 </tr>
        </table>
@@ -144,11 +144,12 @@
      
    </header>
 
-  {%- for message in get_flashed_messages() %}
-  <div class = "alert alert-success">
-    {{ message }}
-  </div>
-  {%- endfor %}
+
+   <!-- {%- for message in get_flashed_messages() %}
+	<div class = "alert alert-success">
+	{{ message }}
+	</div>
+	{%- endfor %} --> 
    
 
   <script>
