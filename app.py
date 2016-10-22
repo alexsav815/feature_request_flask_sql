@@ -6,17 +6,33 @@ from datetime import datetime, timedelta
 
 from flask_wtf import FlaskForm
 from wtforms import Form, BooleanField, StringField, PasswordField, validators
-from wtforms.validators import DataRequired, Length
+from wtforms.validators import DataRequired, Length, Email
 
+from itsdangerous import URLSafeTimedSerializer
+from flask_mail import Mail, Message
 
 app = Flask(__name__)
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///clinets.sqlite3'
-app.config['SECRET_KEY'] = "random string"
+app.config['SECRET_KEY'] = "Sm9obiBTYqwfGSDTRNrtgercHJFlja3MgYXNz"
+app.config['SECURITY_PASSWORD_SALT'] = 'email-confirm-key'
+app.config['MAIL_DEFAULT_SENDER'] = 'feature_request'
+app.config.update(
+    #EMAIL SETTINGS
+    MAIL_SERVER='smtp.gmail.com',
+    MAIL_PORT=465,
+    MAIL_USE_SSL=True,
+    MAIL_USERNAME = 'featurerequestflask',
+    MAIL_PASSWORD = 'featurerequest4$'
+)
+mail = Mail(app)
+
 #app.config['SESSION_COOKIE_SECURE'] = True
+
 
 db = SQLAlchemy(app)
 
@@ -46,13 +62,17 @@ class User(db.Model):
    password = db.Column('password', db.String(10), nullable=False)
    email = db.Column('email', db.String(50), unique=True, nullable=False, index=True)
    registered_on = db.Column('registered_on', db.DateTime())
- 
-   def __init__(self, username, password, email):
+   confirmed = db.Column('confirmed', db.Boolean(), nullable=False, default=False)
+   confirmed_on = db.Column('confirmed_on', db.DateTime(), nullable=True)
+
+   def __init__(self, username, password, email, confirmed, confirmed_on=None):
       self.username = username
       self.password = password
       self.email = email
       self.registered_on = datetime.utcnow()
-      
+      self.confirmed = confirmed
+      self.confirmed_on = confirmed_on
+
    def is_authenticated(self):
       return True
       
@@ -72,12 +92,42 @@ class User(db.Model):
       return '<User %r>' % (self.username)
 
 
+def send_email(to, subject, template):
+   msg = Message(
+      subject,
+      recipients=[to],
+      html=template,
+      sender=app.config['MAIL_DEFAULT_SENDER']
+   )
+   mail.send(msg)
+   
+
+def generate_confirmation_token(email):
+   serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+   return serializer.dumps(email, salt=app.config['SECURITY_PASSWORD_SALT'])
+
+
+def confirm_token(token, expiration=86400):
+   serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+   try:
+      email = serializer.loads(
+         token,
+         salt=app.config['SECURITY_PASSWORD_SALT'],
+         max_age=expiration
+      )
+   except:
+      return False
+   return email
+
+
 class UserForm(Form):
    username = StringField('username', validators=[DataRequired(), Length(max=255)])
-   email = StringField('email', validators=[DataRequired(), Length(max=255)])
-   #password = PasswordField('password', [validators.DataRequired(), validators.EqualTo('password1', message='Passwords must match')])
-   #password1 = PasswordField('Repeat Password')
-   
+   email = StringField('email', validators=[DataRequired(), Email(), Length(max=255)])
+
+class UserPasswordForm(Form):
+   username = StringField('username', validators=[DataRequired(), Length(max=255)])
+   password = PasswordField('password', validators=[DataRequired()])
+     
 #login_manager.session_protection = "strong"
 
 @login_manager.user_loader
@@ -98,6 +148,11 @@ def regLog(message, category):
 def logLog(message, category):
    flash(message, category)
    return render_template("login.html")
+
+def confirmLog(message, category):
+   flash(message, category)
+   return render_template("index.html")
+
 
 @app.route('/register' , methods=['GET','POST'])
 def register():
@@ -121,13 +176,67 @@ def register():
       return regLog("<strong>Error!</strong> E-mail entered is already used. Please enter different e-mail...",'danger')
 
    if request.method == 'POST' and form.validate():
-      user = User(request.form['username'] , request.form['password1'], request.form['email1'])
+      user = User(request.form['username'] , request.form['password1'], request.form['email1'], confirmed=False)
       db.session.add(user)
       db.session.commit()
-      return regLog("User successfully registered! You may now  <a href = \"login\"> Login </a>",'success')
-      return redirect(url_for('login'))
+      
+      token = generate_confirmation_token(user.email)
+      confirm_url = url_for('confirm_email', token=token, _external=True)
+      html = render_template('email/activate.html', confirm_url=confirm_url)
+      subject = "Please confirm your email"
+      send_email(user.email, subject, html)
+
+      return regLog("User successfully registered! A confirmation link has been sent via email. <br> You may now <a href = \"login\"> Login </a>",'success')
+      #return redirect(url_for('login'))
+      ###login_user(user)
+      #flash('A confirmation email has been sent via email.', 'success')
+      #return redirect(url_for('unconfirmed'))
+
    return regLog('<strong>Error!</strong> Registration failed...', 'danger')
    return render_template('register.html', form=form)
+
+
+@app.route('/confirm/<token>')
+#@login_required
+def confirm_email(token):
+   try:
+      email = confirm_token(token)
+   except:
+      return confirmLog('The confirmation link is invalid or has expired.', 'danger')
+      abort(404)
+
+   user = User.query.filter_by(email=email).first_or_404()
+   if user.confirmed:
+       return confirmLog('Account already confirmed.', 'success')
+   else:
+      user.confirmed = True
+      user.confirmed_on = datetime.utcnow()
+      db.session.add(user)
+      db.session.commit()
+      login_user(user)
+      return confirmLog('You have confirmed your account. Thanks!', 'success')
+   #return redirect(url_for('index'))
+
+
+@app.route('/unconfirmed')
+@login_required
+def unconfirmed():
+    if current_user.confirmed:
+        return redirect('index')
+    #return unconfirmedLog('Please confirm your account!', 'warning')
+    return render_template('unconfirmed.html')
+
+
+@app.route('/resend')
+@login_required
+def resend_confirmation():
+    token = generate_confirmation_token(current_user.email)
+    confirm_url = url_for('confirm_email', token=token, _external=True)
+    html = render_template('email/activate.html', confirm_url=confirm_url)
+    subject = "Please confirm your email"
+    send_email(current_user.email, subject, html)
+    flash('A new confirmation email has been sent', 'success')
+    return redirect(url_for('unconfirmed'))
 
 
 @app.route('/login', methods=['GET','POST'])
@@ -140,11 +249,17 @@ def login():
    if registered_user is None:
       return logLog('<strong>Error!</strong> Username or Password is invalid', 'danger')
       return redirect(url_for('login'))
+   #form = UserPasswordForm()
+   #if form.validate():
    login_user(registered_user)
    #return logLog("Logged in successfully. You may now  <a href = \"show_all\"> proceed </a>", 'success')
-   return redirect(request.args.get('next') or url_for('show_all'))
+   if current_user.confirmed:
+      return redirect(request.args.get('next') or url_for('show_all'))
+   #flash('Please confirm your account!', 'warning')
+   return redirect(url_for('unconfirmed'))
 
-
+   #return redirect(request.args.get('next') or url_for('show_all'))
+   
 @app.route('/logout')
 def logout():
    user = g.user

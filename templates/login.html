@@ -11,7 +11,7 @@
       </div>
       
       <div class="modal-body">
-	<form action="" method=post class="form-horizontal">
+	<form action="{{ url_for('login') }}" method="post" class="form-horizontal">
 	  <div class="row" style="width:60%">
             <div align="left" class="col-sm-6">
 	      <label for = "username">Username</label>
@@ -30,6 +30,7 @@
             </div>
 	  </div>
 
+	  
 	  <br>
 	  <div class="row">
 	    <div align="center" style="height:70px" class="col-xs-6">

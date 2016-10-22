@@ -54,7 +54,7 @@
    }
    
    table{
-     height:300px;              // <-- Select the height of the table
+     height:320px;              // <-- Select the height of the table
      display: -moz-groupbox;    // Firefox Bad Effect
    }
    tbody{
@@ -123,16 +123,18 @@
 
    <header>
 
-     <span class="pagetitle"><h2 class="text-center"> <a href = "/show_all" target="_blank" class="title">Feature Request - Alpha</a> </h2></span>
+     <span class="pagetitle"><h2 class="text-center"> <a href = "/" target="_blank" class="title">Feature Request - Alpha</a> </h2></span>
             
      {% if g.user.is_authenticated %}
      <div>
        <table class="table-condensed">
+	 {% if g.user.confirmed %}
 	 <tr>
 	   <td style="text-align:right">
 	     <a href = "{{ url_for('show_all') }}" class="hoverhighlight1"> <span class="glyphicon glyphicon-home"> Home </span> </a>
 	   </td>
 	 </tr>
+	 {% endif %}
 	 <tr>
 	   <td style="text-align:right">
 	     <a href = "{{ url_for('logout') }}" class="hoverhighlight1"> <span class="glyphicon glyphicon-log-out"> Logout <i>{{g.user.username}}</i> </span> </a>

@@ -1,8 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
 
-  
-    
+     
     {%- for category, message in get_flashed_messages(with_categories = true) %}
     <div class = "alert alert-danger">
       {{ message }}
@@ -14,37 +13,39 @@
       <form id="enter_request" action = "{{ request.path }}" method = "POST">
 	<h3 style="color:#0066CC">Submit New Request</h3>
 	<hr/>
-	<table class="" >
-          <tr style="width:50%">
-	    <td><label for = "title">Title</label></td>
-            <td><input type="text" name="title" id="title" required></td>
-	  </tr>
-	  <tr style="width:50%">
-	    <td><label for = "description">Description</label></td>
-            <td><textarea name="description" id="description" rows="5" cols="60" required></textarea></td>
-	  </tr>
-	  <tr style="width:50%">
-            <td><label for = "client">Client</label></td>
-            <td><select id="client" name="client"><option  value="Client A">Client A</option><option value="Client B">Client B</option><option value="Client C">Client C</option></select></td>
-          </tr>
-	  <script>
-	    $( "#client" ).attr( "value", $( "#client" ).val() );
-	  </script>
-	  <tr style="width:50%">
-	    <td><label for="priority">Priority </label></td>
-            <td><input type="number" name="priority" id="priority" value="1" data-type="integer" min="1" max="10"></td>
-	  </tr>
-	  <tr style="width:50%">
-	    <td><label for="targetdate">Target Date </label></td>
-	    <td><input type="text" name="targetdate" id="targetdate" required pattern="^(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])[- /.](19|20)[0-9][0-9]$"  placeholder="MM/DD/YYYY"></td>
-	  </tr>
-	  <tr style="width:50%">
-	    <td><label for="productarea">Product Area </label></td>
-	    <td><select id="productarea" name="productarea"><option value="policies">Policies</option><option value="billing">Billing</option><option value="claims">Claims</option><option value="reports">Reports</option></select></td>
-	  </tr>
-	  <script>
-	    $( "#productarea" ).attr( "value", $( "#productarea" ).val() );
-	  </script>
+	<table class="table-responsive">
+	  <tbody>
+            <tr>
+	      <td style="width:10%"><label for = "title">Title</label></td>
+              <td style="width:90%"><input type="text" name="title" id="title" required></td>
+	    </tr>
+	    <tr>
+	      <td style="width:10%"><label for = "description">Description</label></td>
+              <td style="width:90%"><textarea name="description" id="description" rows="5" cols="60" required></textarea></td>
+	    </tr>
+	    <tr>
+              <td style="width:10%"><label for = "client">Client</label></td>
+              <td style="width:90%"><select id="client" name="client"><option  value="Client A">Client A</option><option value="Client B">Client B</option><option value="Client C">Client C</option></select></td>
+            </tr>
+	    <script>
+	     $( "#client" ).attr( "value", $( "#client" ).val() );
+	    </script>
+	    <tr>
+	      <td style="width:10%"><label for="priority">Priority </label></td>
+              <td style="width:90%"><input type="number" name="priority" id="priority" value="1" data-type="integer" min="1" max="10"></td>
+	    </tr>
+	    <tr>
+	      <td style="width:10%"><label for="targetdate">Target Date </label></td>
+	      <td style="width:90%"><input type="text" name="targetdate" id="targetdate" required pattern="^(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])[- /.](19|20)[0-9][0-9]$"  placeholder="MM/DD/YYYY"></td>
+	    </tr>
+	    <tr>
+	      <td style="width:10%"><label for="productarea">Product Area </label></td>
+	      <td style="width:90%"><select id="productarea" name="productarea"><option value="policies">Policies</option><option value="billing">Billing</option><option value="claims">Claims</option><option value="reports">Reports</option></select></td>
+	    </tr>
+	    <script>
+	     $( "#productarea" ).attr( "value", $( "#productarea" ).val() );
+	    </script>
+	  </tbody>
 	</table>
 	
 	<hr/>
