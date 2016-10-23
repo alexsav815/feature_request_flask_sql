@@ -1,5 +1,4 @@
-from flask import Flask, request, flash, url_for, redirect, render_template, session, g, make_response
-#from flask.ext.login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
+from flask import Flask, abort, request, flash, url_for, redirect, render_template, session, g, make_response
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
@@ -8,7 +7,7 @@ from flask_wtf import FlaskForm
 from wtforms import Form, BooleanField, StringField, PasswordField, validators
 from wtforms.validators import DataRequired, Length, Email
 
-from itsdangerous import URLSafeTimedSerializer
+from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from flask_mail import Mail, Message
 
 app = Flask(__name__)
@@ -107,7 +106,7 @@ def generate_confirmation_token(email):
    return serializer.dumps(email, salt=app.config['SECURITY_PASSWORD_SALT'])
 
 
-def confirm_token(token, expiration=86400):
+def confirm_token(token, expiration=3600):
    serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
    try:
       email = serializer.loads(
@@ -152,6 +151,10 @@ def logLog(message, category):
 def confirmLog(message, category):
    flash(message, category)
    return render_template("index.html")
+
+def unconfirmLog(message, category):
+   flash(message, category)
+   return redirect(url_for('unconfirmed'))
 
 
 @app.route('/register' , methods=['GET','POST'])
@@ -199,23 +202,26 @@ def register():
 @app.route('/confirm/<token>')
 #@login_required
 def confirm_email(token):
-   try:
-      email = confirm_token(token)
-   except:
-      return confirmLog('The confirmation link is invalid or has expired.', 'danger')
-      abort(404)
-
-   user = User.query.filter_by(email=email).first_or_404()
-   if user.confirmed:
-       return confirmLog('Account already confirmed.', 'success')
-   else:
-      user.confirmed = True
-      user.confirmed_on = datetime.utcnow()
-      db.session.add(user)
-      db.session.commit()
-      login_user(user)
-      return confirmLog('You have confirmed your account. Thanks!', 'success')
-   #return redirect(url_for('index'))
+   #try:
+   #   email = confirm_token(token)
+   #except:
+   #   return unconfirmLog('The confirmation link is invalid or has expired.', 'danger')   
+   #   abort(404)
+   email = confirm_token(token)
+   if email:
+      user = User.query.filter_by(email=email).first_or_404()
+      if user.confirmed:
+         return confirmLog('Account already confirmed.', 'success')
+      else:
+         user.confirmed = True
+         user.confirmed_on = datetime.utcnow()
+         db.session.add(user)
+         db.session.commit()
+         login_user(user)
+         return confirmLog('You have confirmed your account. Thanks!', 'success')
+   else: 
+      return redirect(url_for('expired'))
+      #return expiredLog('The confirmation link is invalid or has expired.', 'danger')  
 
 
 @app.route('/unconfirmed')
@@ -225,6 +231,13 @@ def unconfirmed():
         return redirect('index')
     #return unconfirmedLog('Please confirm your account!', 'warning')
     return render_template('unconfirmed.html')
+
+
+@app.route('/expired')
+def expired():
+   user = g.user
+   logout_user()
+   return render_template('expired.html')
 
 
 @app.route('/resend')
