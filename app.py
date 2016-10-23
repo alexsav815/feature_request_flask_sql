@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 from flask_wtf import FlaskForm
 from wtforms import Form, BooleanField, StringField, PasswordField, validators
-from wtforms.validators import DataRequired, Length, Email
+from wtforms.validators import DataRequired, Length, Email, InputRequired
 
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from flask_mail import Mail, Message
@@ -120,13 +120,22 @@ def confirm_token(token, expiration=3600):
 
 
 class UserForm(Form):
-   username = StringField('username', validators=[DataRequired(), Length(max=255)])
-   email = StringField('email', validators=[DataRequired(), Email(), Length(max=255)])
+   username = StringField('Username', validators=[DataRequired(), Length(max=255)])
+   email = StringField('Email', validators=[DataRequired(), Email(), Length(max=255)])
 
 class UserPasswordForm(Form):
-   username = StringField('username', validators=[DataRequired(), Length(max=255)])
-   password = PasswordField('password', validators=[DataRequired()])
+   username = StringField('Username', validators=[DataRequired(), Length(max=255)])
+   password = PasswordField('Password', validators=[DataRequired()])
      
+class EmailForm(Form):
+   email = StringField([InputRequired(), Email()])
+   #email =  StringField('Email', validators=[DataRequired(), Email()]) # Does not Work!!
+
+class PasswordForm(Form):
+   password = PasswordField([InputRequired()])
+   #password = PasswordField('Password', validators=[DataRequired()])
+
+
 #login_manager.session_protection = "strong"
 
 @login_manager.user_loader
@@ -154,7 +163,19 @@ def confirmLog(message, category):
 
 def unconfirmLog(message, category):
    flash(message, category)
-   return redirect(url_for('unconfirmed'))
+   return render_template("unconfirmed.html")
+
+def recoverLog(message, category):
+   flash(message, category)
+   return render_template("reset.html")
+
+def resetdoingLog(message, category):
+   flash(message, category)
+   return render_template("reset_with_token.html")
+
+def resetdoneLog(message, category):
+   flash(message, category)
+   return render_template("index.html")
 
 
 @app.route('/register' , methods=['GET','POST'])
@@ -190,13 +211,58 @@ def register():
       send_email(user.email, subject, html)
 
       return regLog("User successfully registered! A confirmation link has been sent via email. <br> You may now <a href = \"login\"> Login </a>",'success')
-      #return redirect(url_for('login'))
-      ###login_user(user)
-      #flash('A confirmation email has been sent via email.', 'success')
-      #return redirect(url_for('unconfirmed'))
-
+            
    return regLog('<strong>Error!</strong> Registration failed...', 'danger')
-   return render_template('register.html', form=form)
+   #return render_template('register.html', form=form)
+
+
+
+@app.route('/reset', methods=["GET", "POST"])
+def reset():
+   if request.method == 'GET':
+      return render_template('reset.html')
+   email = request.form['email']
+   form = EmailForm(request.form)
+   
+   if request.method == 'POST' and form.validate():
+      #user = User.query.filter_by(email=email).first_or_404()
+      user=User.query.filter_by(email=email).first()
+      if user is None:
+         return recoverLog("<strong>Error!</strong> E-mail entered is not associated with any account",'danger')
+
+      token = generate_confirmation_token(user.email)
+      recover_url = url_for('reset_with_token', token=token, _external=True)
+      html = render_template('email/recover.html', recover_url=recover_url)
+      subject = "Password reset requested"
+      send_email(user.email, subject, html)
+
+      return recoverLog("A link for password reset has been sent to provided email.",'success')
+   return render_template('reset.html', form=form)
+
+
+@app.route('/reset/<token>', methods=["GET", "POST"])
+def reset_with_token(token):
+   email = confirm_token(token)
+   if email:
+      if request.method == 'GET':
+         return render_template('reset_with_token.html')
+         
+      password = request.form['password']
+      password1 = request.form['password1']
+      if password != password1:
+         return resetdoingLog("<strong>Error!</strong> Passwords did not match. Please enter passwords again...", 'danger')
+      
+      form = PasswordForm(request.form)
+      if request.method == 'POST' and form.validate():
+         user = User.query.filter_by(email=email).first_or_404()
+         user.password = password1
+         db.session.add(user)
+         db.session.commit()
+
+         return resetdoneLog("Password has been successfully reset!",'success')
+   else:
+      return render_template('expired.html')
+      #return render_template('reset_with_token.html', form=form, token=token)
 
 
 @app.route('/confirm/<token>')
@@ -221,8 +287,7 @@ def confirm_email(token):
          return confirmLog('You have confirmed your account. Thanks!', 'success')
    else: 
       return redirect(url_for('expired'))
-      #return expiredLog('The confirmation link is invalid or has expired.', 'danger')  
-
+      
 
 @app.route('/unconfirmed')
 @login_required
@@ -240,7 +305,7 @@ def expired():
    return render_template('expired.html')
 
 
-@app.route('/resend')
+@app.route('/resend_confirmation')
 @login_required
 def resend_confirmation():
     token = generate_confirmation_token(current_user.email)
@@ -265,7 +330,7 @@ def login():
    #form = UserPasswordForm()
    #if form.validate():
    login_user(registered_user)
-   #return logLog("Logged in successfully. You may now  <a href = \"show_all\"> proceed </a>", 'success')
+   
    if current_user.confirmed:
       return redirect(request.args.get('next') or url_for('show_all'))
    #flash('Please confirm your account!', 'warning')

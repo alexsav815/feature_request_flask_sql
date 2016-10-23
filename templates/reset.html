@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+{% block body %}
+
+
+<div class="modal fade" id="myModal_reset" role="dialog">
+  <div class="modal-dialog modal-sm">
+    
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+	<h3 class="modal-title" style="text-align:center;color:white"> Reset Password </h3>        
+      </div>
+      
+      <div class="modal-body" align="center">
+	<p>Enter e-mail address accosiated with the user's account:</p>
+	<form action="{{ url_for('reset') }}" method="post" id="regform" class="form-horizontal">
+	  <div>
+	    <input type="email" id="email" name="email" class="input-xlarge" placeholder="Enter e-mail address" value="" required>
+          </div>
+
+	  <br>
+	  <div class="row" style="width:70%">
+	    <div align="center" style="height:50px" class="col-sm-6">
+	      <button type="submit" class="btn btn-success btn-md"><span"></span> Submit </button>
+            </div>
+	    <div align="center" style="height:50px" class="col-sm-6">
+	      <a href = "{{ url_for('index') }}" class="btn btn-primary btn-md"> <span></span> Cancel </a>
+            </div>
+	  </div>
+	  
+	</form>
+	
+	<div class="modal-footer">
+	  {%- with messages = get_flashed_messages(with_categories=true) -%}
+	  {%- if messages -%}
+	  {%- for category, message in messages -%}
+	  
+	  <div align="center" class = "alert alert-{{category}}">
+            {{ message|safe }}
+          </div>
+	  
+	  {%- endfor -%}
+	  {%- endif -%}
+	  {%- endwith %}
+	</div>	
+	
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script type="text/javascript">
+ $(document).ready(function () {
+   $('#myModal_reset').modal({backdrop: 'static', keyboard: false, show: true});
+ });
+</script>
+
+{% endblock %}

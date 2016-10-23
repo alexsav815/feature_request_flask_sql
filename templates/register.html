@@ -12,7 +12,7 @@
       
       <div class="modal-body" align="center">
 	
-	<form action="/register" method=post id="regform" class="form-horizontal">
+	<form action="/register" method="POST" id="regform" class="form-horizontal">
 	  <div class="row" style="width:70%">
             <div align="left" class="col-sm-6">
 	      <label for = "username">Username</label>
@@ -62,13 +62,13 @@
 
 	  <br>
 	  <div class="row" style="width:70%">
-	    <div align="center" style="height:70px" class="col-sm-4">
+	    <div align="center" style="height:50px" class="col-sm-4">
 	      <button type="submit" class="btn btn-success btn-md"><span class="glyphicon glyphicon-registration-mark"></span> Register </button>
             </div>
-	    <div align="center" style="height:70px" class="col-sm-4">
+	    <div align="center" style="height:50px" class="col-sm-4">
 	      <button type="button" id="registration_reset" class="btn btn-primary"> Reset Form </button>
             </div>
-	    <div align="center" style="height:70px" class="col-sm-4">
+	    <div align="center" style="height:50px" class="col-sm-4">
 	      <a href = "{{ url_for('index') }}" class="btn btn-primary btn-md"> <span></span> Cancel </a>
             </div>
 	  </div>

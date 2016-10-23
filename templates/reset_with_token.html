@@ -1,0 +1,97 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<div class="modal fade" id="myModal_resettoken" role="dialog">
+  <div class="modal-dialog modal-sm">
+    
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+	<h3 class="modal-title" style="text-align:center;color:white"> Enter New Password </h3>        
+      </div>
+      
+      <div class="modal-body" align="center">
+	
+	<form action="" method="POST" id="resetform" class="form-horizontal">
+
+	  <div class="row">
+            <div align="left" class="col-sm-3">
+	      <label for = "password">Password</label>
+	    </div>
+	    <div align="left" class="col-sm-9">
+              <input type="password" id="password" name="password" class="input-xlarge" placeholder="Enter password" value="" required>
+            </div>
+	  </div>
+	  
+	  <div class="row">
+            <div align="left" class="col-sm-3">
+	      <label for = "password1">Confirm</label>
+	    </div>
+	    <div align="left" class="col-sm-9">
+              <input type="password" id="password1" name="password1" class="input-xlarge" placeholder="Repeat password" value="" required>
+            </div>
+	  </div>
+	
+	  <br>
+	  <div class="row">
+	    <div align="center" style="height:50px" class="col-sm-4">
+	      <button type="submit" class="btn btn-success btn-md"><span></span> Submit </button>
+            </div>
+	    <div align="center" style="height:50px" class="col-sm-4">
+	      <button type="button" id="reset_clear" class="btn btn-primary"> Reset </button>
+            </div>
+	    <div align="center" style="height:50px" class="col-sm-4">
+	      <a href = "{{ url_for('index') }}" class="btn btn-primary btn-md"> <span></span> Cancel </a>
+            </div>
+	  </div>
+
+	</form>
+	
+	<div class="modal-footer">
+	  {%- with messages = get_flashed_messages(with_categories=true) -%}
+	  {%- if messages -%}
+	  {%- for category, message in messages -%}
+	  
+	  <div align="center" class = "alert alert-{{category}}">
+            {{ message|safe }}
+          </div>
+	  
+	  {%- endfor -%}
+	  {%- endif -%}
+	  {%- endwith %}
+	</div>	
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+ $( "#reset_clear" ).click( function() {
+   return reg_reset();
+ });
+ 
+ reg_reset = function() {
+   $("#resetform :input" ).each(function() {
+     var t = $("#" + $( this ).attr( "id" ));
+     //console.log ("ID: " +  "#" + $( this ).attr( "id" ) + "_msg");
+     t.val( t.attr( "value" ) );
+     console.log ("ID: " + "#" + $( this ).attr( "id" ));
+     console.log ("Value: " + t.attr( "value" ));
+     //$( "#" + $( this ).attr( "id" ) + "_msg" ).html( "" );
+   });
+   return false;
+ }
+
+ 
+</script>  
+
+<script type="text/javascript">
+ $(document).ready(function () {
+   $('#myModal_resettoken').modal({backdrop: 'static', keyboard: false, show: true});
+ });
+</script>
+
+{% endblock %}
