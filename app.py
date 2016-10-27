@@ -1,7 +1,16 @@
 from flask import Flask, abort, request, flash, url_for, redirect, render_template, session, g, make_response
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
+from jinja2 import environment
+
+from flask_bcrypt import Bcrypt
+#from flask_bcrypt import generate_password_hash
+
 from datetime import datetime, timedelta
+import pytz
+from pytz import timezone
+from functools import wraps, update_wrapper
 
 from flask_wtf import FlaskForm
 from wtforms import Form, BooleanField, StringField, PasswordField, validators
@@ -20,15 +29,19 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///clinets.sqlite3'
 app.config['SECRET_KEY'] = "Sm9obiBTYqwfGSDTRNrtgercHJFlja3MgYXNz"
 app.config['SECURITY_PASSWORD_SALT'] = 'email-confirm-key'
 app.config['MAIL_DEFAULT_SENDER'] = 'feature_request'
+app.config['ADMIN'] = 'alexsav.science@gmail.com'
+
 app.config.update(
-    #EMAIL SETTINGS
-    MAIL_SERVER='smtp.gmail.com',
-    MAIL_PORT=465,
-    MAIL_USE_SSL=True,
-    MAIL_USERNAME = 'featurerequestflask',
-    MAIL_PASSWORD = 'featurerequest4$'
+   #EMAIL SETTINGS
+   MAIL_SERVER='smtp.gmail.com',
+   MAIL_PORT=465,
+   MAIL_USE_SSL=True,
+   MAIL_USERNAME = 'featurerequestflask',
+   MAIL_PASSWORD = 'featurerequest4$',
+   BCRYPT_LOG_ROUNDS = 12
 )
 mail = Mail(app)
+bcrypt = Bcrypt(app)
 
 #app.config['SESSION_COOKIE_SECURE'] = True
 
@@ -54,24 +67,49 @@ class feature_request(db.Model):
       self.productarea = productarea
 
 
-class User(db.Model):
-   __tablename__ = "User"
+class User(UserMixin,db.Model):
+   __tablename__ = "user_table"
    id = db.Column('user_id', db.Integer, primary_key=True)
    username = db.Column('username', db.String(20), nullable=False, unique=True, index=True)
-   password = db.Column('password', db.String(10), nullable=False)
+   #password = db.Column('password', db.String(10), nullable=False)
+   _password = db.Column('password', db.String(10), nullable=False)
    email = db.Column('email', db.String(50), unique=True, nullable=False, index=True)
    registered_on = db.Column('registered_on', db.DateTime())
+   last_seen = db.Column('last_seen', db.DateTime(), default=datetime.utcnow(), nullable=True)
+   ever_seen = db.Column('ever_seen', db.Boolean(), nullable=False, default=False)
    confirmed = db.Column('confirmed', db.Boolean(), nullable=False, default=False)
    confirmed_on = db.Column('confirmed_on', db.DateTime(), nullable=True)
+   role = db.Column('role', db.String(20), default=None)
 
-   def __init__(self, username, password, email, confirmed, confirmed_on=None):
-      self.username = username
-      self.password = password
-      self.email = email
-      self.registered_on = datetime.utcnow()
-      self.confirmed = confirmed
-      self.confirmed_on = confirmed_on
+   #def __init__(self, username, password, email, confirmed, confirmed_on=None):
+   #def __init__(self, username, email, confirmed, confirmed_on=None):
+   #   self.username = username
+   #   #self.password = password
+   #   #self.password = bcrypt.generate_password_hash(password)
+   #   self.email = email
+   #   self.registered_on = datetime.utcnow()
+   #   self.confirmed = confirmed
+   #   self.confirmed_on = confirmed_on
 
+   @hybrid_property
+   def password(self):
+      return self._password
+      
+   #@property
+   #def password(self):
+   #   raise AttributeError('password is not a readable attribute')
+
+   @password.setter
+   def _set_password(self, plaintext):
+      self._password = bcrypt.generate_password_hash(plaintext)
+
+   def is_correct_password(self, plaintext):
+      return bcrypt.check_password_hash(self._password, plaintext)   
+      
+   #def ping(self):
+   #   self.last_seen = datetime.utcnow()
+   #   db.session.add(self)
+      
    def is_authenticated(self):
       return True
       
@@ -85,7 +123,7 @@ class User(db.Model):
       try:
          return unicode(self.id)  # python 2
       except NameError:
-         return str(self.id)  # python 3
+         return str(self.id)      # python 3
        
    def __repr__(self):
       return '<User %r>' % (self.username)
@@ -99,6 +137,18 @@ def send_email(to, subject, template):
       sender=app.config['MAIL_DEFAULT_SENDER']
    )
    mail.send(msg)
+
+
+def format_datetime(value):
+   format = '%b %d, %Y - %H:%M CDT'
+   tz = pytz.timezone('US/Central')
+   utc = pytz.timezone('UTC')
+   tz_aware_dt = utc.localize(value)
+   local_dt = tz_aware_dt.astimezone(tz)
+   return local_dt.strftime(format)
+   #return value.strftime(format)
+
+environment.DEFAULT_FILTERS['datetime'] = format_datetime
    
 
 def generate_confirmation_token(email):
@@ -117,6 +167,21 @@ def confirm_token(token, expiration=3600):
    except:
       return False
    return email
+
+
+def required_roles(*roles):
+   def wrapper(f):
+      @wraps(f)
+      def wrapped(*args, **kwargs):
+         if get_current_user_role() not in roles:
+            flash('Authentication error, please check your details and try again','error')
+            return redirect(url_for('index'))
+         return f(*args, **kwargs)
+      return wrapped
+   return wrapper
+ 
+def get_current_user_role():
+   return g.user.role
 
 
 class UserForm(Form):
@@ -148,6 +213,16 @@ def load_user(id):
 @app.before_request
 def before_request():
    g.user = current_user
+   #if current_user.is_authenticated:
+   #   current_user.ping()
+   #   #print (current_user.last_seen)
+
+@app.after_request
+def add_header(r):
+    r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    r.headers["Pragma"] = "no-cache"
+    r.headers["Expires"] = "0"
+    return r
 
 def regLog(message, category):
    flash(message, category)
@@ -155,7 +230,7 @@ def regLog(message, category):
 
 def logLog(message, category):
    flash(message, category)
-   return render_template("login.html")
+   return redirect(url_for('login'))
 
 def confirmLog(message, category):
    flash(message, category)
@@ -176,6 +251,22 @@ def resetdoingLog(message, category):
 def resetdoneLog(message, category):
    flash(message, category)
    return render_template("index.html")
+
+
+@app.route('/admin_menu')
+@required_roles('admin')
+def admin_menu():
+   return render_template("admin_menu.html", userlist = User.query.all())
+
+
+@app.route('/delete_user/<username>', methods=['POST'])
+@required_roles('admin')
+def delete_user(username):
+   usertoremove = User.query.filter_by(username=username).first()
+   db.session.delete(usertoremove)
+   db.session.commit()
+   flash('Entry was deleted')
+   return redirect(url_for('admin_menu'))
 
 
 @app.route('/register' , methods=['GET','POST'])
@@ -200,7 +291,16 @@ def register():
       return regLog("<strong>Error!</strong> E-mail entered is already used. Please enter different e-mail...",'danger')
 
    if request.method == 'POST' and form.validate():
-      user = User(request.form['username'] , request.form['password1'], request.form['email1'], confirmed=False)
+      #user = User(request.form['username'] , request.form['password1'], request.form['email1'], confirmed=False)
+      #user = User(request.form['username'], request.form['email1'], confirmed=False)
+      #user.password = password1
+      user = User(username=username, password=password1, email=email1, registered_on=datetime.utcnow(), confirmed=False)
+      
+      if user.email == app.config['ADMIN']:
+         user.role = 'admin'
+      else:
+         user.role = 'user'
+      
       db.session.add(user)
       db.session.commit()
       
@@ -323,22 +423,43 @@ def login():
       return render_template('login.html')
    username = request.form['username']
    password = request.form['password']
-   registered_user = User.query.filter_by(username=username,password=password).first()
+   #registered_user = User.query.filter_by(username=username,password=password).first()
+   registered_user = User.query.filter_by(username=username).first()
    if registered_user is None:
-      return logLog('<strong>Error!</strong> Username or Password is invalid', 'danger')
-      return redirect(url_for('login'))
+      return logLog('<strong>Error!</strong> Username is invalid', 'danger')
+      #return logLog('<strong>Error!</strong> Username or Password is invalid', 'danger')
+      
    #form = UserPasswordForm()
    #if form.validate():
-   login_user(registered_user)
    
-   if current_user.confirmed:
-      return redirect(request.args.get('next') or url_for('show_all'))
-   #flash('Please confirm your account!', 'warning')
-   return redirect(url_for('unconfirmed'))
+   #print (password, registered_user._password)
+
+   #exit()
+   if registered_user.is_correct_password(password):
+      if not registered_user.ever_seen:
+         registered_user.ever_seen=True
+         db.session.add(registered_user)
+      
+      registered_user.last_seen = datetime.utcnow()  
+      db.session.commit()
+         
+      login_user(registered_user)
+      
+      #print (registered_user.username, registered_user.last_seen)
+        
+      if current_user.confirmed:
+         return redirect(request.args.get('next') or url_for('show_all'))
+         #flash('Please confirm your account!', 'warning')
+      return redirect(url_for('unconfirmed'))
+   else:
+      return logLog('<strong>Error!</strong> Password is invalid', 'danger')
+      #return redirect(url_for('login'))
 
    #return redirect(request.args.get('next') or url_for('show_all'))
    
+
 @app.route('/logout')
+#@nocache
 def logout():
    user = g.user
    logout_user()
@@ -348,10 +469,17 @@ def logout():
 @app.route('/index')
 def index():
    user = g.user
-   #resp = make_response(render_template('index.html', user=user))
-   #resp.set_cookie('PHPSESSID', '')
-   #return resp
+   #response = make_response(render_template('index.html', user=user))
+   #response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0') 
+   #response.headers.add('Pragma','no-cache')
+   #response.headers.add('Expires','0')
+   #response.cache_control.no_cache = True
+   #response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+   #response.headers['Pragma'] = 'no-cache'
+   #response.headers['Expires'] = '-1'
+   #return response
    return render_template('index.html', user=user)
+
 
 @app.route('/show_all')
 @login_required

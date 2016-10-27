@@ -1,0 +1,72 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div id="tempdiv">
+</div>
+
+<div class="container">
+  <h3>Admin Menu</h3>
+  <br/>
+  <h4 style="color:black">user count: {{userlist|length}}</h4>
+  <table id="usertable" class="table table-condensed table-responsive tablesorter" >
+
+    <thead style="background-color:#999967">
+      <tr>
+        <th class="hoverhighlight" style="width:7%;text-align:center">Username</th>
+        <th class="hoverhighlight" style="width:23%;text-align:center">E-mail</th>
+	<th class="hoverhighlight" style="width: 8%;text-align:center">Confirmed</th>
+	<th class="hoverhighlight" style="width:19%;text-align:center">Confirmed_on</th>
+        <th class="hoverhighlight" style="width:19%;text-align:center">Registered_on</th>
+	<th class="hoverhighlight" style="width:19%;text-align:center">Last_login</th>
+        <th class="hoverhighlight" style="width: 5%;text-align:center">Role</th>
+      </tr>			  
+    </thead>
+    
+    <tbody>
+      {% for req in userlist %}
+      <tr>
+        <td style="width:7%;text-align:center">{{ req.username }}</td>
+        <td style="width:23%;text-align:center"><a  href = "mailto:{{ req.email }}" style="color:blue">{{req.email}}</a> 
+	  {% if req != current_user %} <br/> 
+	  <form action="/delete_user/{{ req.username }}" method="post">
+	    <input type="submit" value="Remove" />
+	  </form> 
+	  {% endif %}
+	</td>
+	<td style="width: 8%;text-align:center">{{ req.confirmed }}</td>
+	<td style="width:19%;text-align:center"> 
+	  {% if req.confirmed %}
+	  {{ req.confirmed_on|datetime }}
+	  {% else %}
+	  N/A
+	  {% endif %}
+	</td>
+        <td style="width:19%;text-align:center">{{ req.registered_on|datetime }}</td>
+	<td style="width:19%;text-align:center">
+	  {% if req.ever_seen %}
+	  {{ req.last_seen|datetime }}
+	  {% else %}
+	  N/A
+	  {% endif %}
+	</td>
+	<td style="width: 5%;text-align:center">{{ req.role }}</td>
+	<!-- <td style="text-align:center">{% if req.role == 'admin' %} Yes {% endif %}</td> -->
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  
+</div>
+
+
+<script>
+ $(document).ready(function() 
+   { 
+     $("#usertable").tablesorter(); 
+   } 
+ ); 
+</script>  
+
+
+
+{% endblock %}
