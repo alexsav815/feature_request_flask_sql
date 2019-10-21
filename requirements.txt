@@ -4,6 +4,6 @@ Flask-SQLAlchemy==1.0
 Flask-Login==0.3.2
 Flask-Mail==0.9.1
 Flask-WTF==0.13.1
-Werkzeug==0.9.4
+Werkzeug==0.15.3
 itsdangerous==0.22
 gunicorn==19.6.0
