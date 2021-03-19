@@ -2,7 +2,7 @@ BeautifulSoup==3.2.1
 CherryPy==3.2.2
 Flask==0.8
 Flask-SQLAlchemy==2.1
-Jinja2==2.6
+Jinja2==2.11.3
 Markdown==2.4
 MarkupSafe==0.23
 ##PAM==0.4.2
