@@ -70,7 +70,7 @@ six==1.5.2
 ###system-service==0.1.6
 ##uTidylib==0.2
 ##unity-lens-photos==1.0
-urllib3==1.7.1
+urllib3==1.26.5
 ###vboxapi==1.0
 virtualenv==15.0.3
 wheel==0.24.0
