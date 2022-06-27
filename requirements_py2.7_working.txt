@@ -61,7 +61,7 @@ pyserial==2.6
 ##python-debian==0.1.21-nmu2ubuntu2
 pytz==2012c
 pyxdg==0.25
-reportlab==3.0
+reportlab==3.5.55
 repoze.lru==0.6
 requests==2.2.1
 ##sessioninstaller==0.0.0
