@@ -20,7 +20,7 @@ Werkzeug==0.8.3
 ##apsw==3.8.2-r1
 ##apt-xapian-index==0.45
 argparse==1.2.1
-certifi==0.0.8
+certifi==2022.12.7
 chardet==1.0.1
 click==6.6
 colorama==0.2.5
